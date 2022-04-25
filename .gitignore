@@ -15,3 +15,5 @@
 *.pdf
 
 \References
+.vscode
+\_minted-main
