@@ -19,6 +19,18 @@
 
 \subsection{The Docker Engine}
 \label{sec::arch:engine}
+The Docker Engine is the core software responsible for running and managing containers, which consists of several modular components following \ac{OCI} specifications. The Engine is implemented as a client-server aplication, consisting in the following components:
+
+\begin{itemize}
+    \item A server running the daemon process \texttt{dockerd};
+    \item The remote web \ac{API};
+    \item The \ac{CLI} client, \texttt{docker}.
+\end{itemize}
+
+
+
+The CLI uses Docker APIs to control or interact with the Docker daemon through scripting or direct CLI commands. Many other Docker applications use the underlying API and CLI. The daemon creates and manage Docker objects, such as images, containers, networks, and volumes.
+
 \subsubsection{Client server} (Todo: join this sections)
 \subsubsection{Monolithic Architecture} (Todo: join this sections)
 \subsubsection{runc}
