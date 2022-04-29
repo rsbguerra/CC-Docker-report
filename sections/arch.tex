@@ -38,7 +38,7 @@ Within this architecture, the Docker daemon is the component responsible for cre
     \centering
     \includegraphics[width=0.25\textwidth]{docker_engine.png}
     \caption{Current and planned container use for all organizations.}
-    \label{fig:docker-engine-server}
+    \label{fig::docker-engine-server}
 \end{figure}
 
 Despite being, at its core, a client-server architecture, Docker's server is far from monolithic, as shown in figure \ref{fig:docker-engine-server}. The server operates a set of smaller components, among them \texttt{runc} and \texttt{containerd}, the main modules responsible for creating and running containers. Both implement as closely as possible the OCI open source project specifications\cite{Poulton2020-ju, oci-runc, git-runc, docker-containerd}.
@@ -104,7 +104,7 @@ On the other hand, bind mounts consist on directories on the host machine being 
 \placeholder{Connect section to Networking, if possible}
 
 \subsection{Networking}
-\label{sec::arch:net}
+\label{ssec::arch:net}
 
 Different types of bridge networking:
 
