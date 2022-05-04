@@ -105,44 +105,44 @@ On the other hand, bind mounts consist on directories on the host machine being 
 
 \subsection{Networking}
 \label{ssec::arch:net}
-\placeholder{Begin draft of network}
 
-A container attached to a Docker network will get a unique IP address
-
-Docker also treats networks as first-class entities, own life cycle and are not bound to any other object
-
-At the highest level, Docker networking comprises three major components:
+Docker containers are able to establish network connections both between one or various containers, or between non-container networks. When a container is attached to a Docker network, an unique \acs{IP} address is attributed to said container. Docker networks are regarded as first-class entities, each having their own life cycle and are not dependent on other components. This element of Docker is composed by three main modules:
 
 \begin{itemize}
-    \item The Container Network Model (CNM) -- design specification. outlines the fundamental building blocks of a Docker network.
-    \item libnetwork -- real-world implementation of the CNM, and is used by Docker. It's written in Go, and implements the core components outlined in the CNM.
-    \item Drivers
+    \item \textbf{\ac{CNM}} --- the network's design specifications which outlines the fundamental building blocks of a docker network;
+    \item \textbf{\texttt{libnetwork}} --- native Go implementation of the core components outlined in the \ac{CNM};
+    \item \textbf{Network drivers} --- pluggable interfaces that provide the networking subsystem.
 \end{itemize}
 
-\placeholder{Seperate paragraph about CNM}
 
-A \textbf{sandbox} is an isolated network stack. It includes; Ethernet interfaces, ports, routing tables, and DNS config.
+To fully comprehend the different network configurations available, it's important the underlining building blocks of the \ac{CNM} interface. Each container defines a \textbf{network sandbox}, which is an isolated environment containing the networking configuration of the container, including ethernet interfaces, ports, routing tables and \acs{DNS} configuration. A network sandbox may contain multiple \textbf{endpoints}, the virtual network interfaces responsible for maintaining the connection between the sandbox and a given network. A \textbf{network} is a uniquely identifiable group of endpoints capable of communicating with each other, connecting different networking sandboxes.
 
-\textbf{Endpoints} are virtual network interfaces (E.g. veth). Like normal network interfaces, they're responsible for making connections. In the case of the CNM, it's the job of the endpoint to connect a sandbox to a network.
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.45\textwidth]{cnm-interface.png}
+    \caption{Diagram representing the architecture of \ac{CNM} \cite{fig-src:cnm}.}
+    \label{fig:cnm-interface}
+\end{figure}
 
-\textbf{Networks} are a software implementation of an 802.1d bridge (more commonly known as a switch). As such, they group together, and isolate, a collection of endpoints that need to communicate.
+Based on these building blocks, the \texttt{libnetwork} is the core implementation of the networking functionalities defined by the \ac{CNM}. The drivers are responsible for handling the connectivity and isolation of the network objects (figure \ref{fig:cnm-drivers}).
 
-Libnetwork is The CNM is the design doc, and libnetwork is the canonical implementation. It's open-source, written in Go, cross-platform (Linux and Windows), and used by Docker.
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.45\textwidth]{cnm-drivers.png}
+    \caption{Diagram demonstrating how the Docker deamon interacts with the various drivers via the \texttt{libnetwork} \cite{fig-src:cnm}.}
+    \label{fig:cnm-drivers}
+\end{figure}
 
-Different types of network drivers:
+It's possible to implement and use 3rd-party drivers, but Docker is shipped with several built-in drivers, known as native or local drivers. These being:
 
 \begin{itemize}
-    \item \textbf{bridge} - The bridge driver provides intercontainer connectivity for all containers running on the same machine. best when you need multiple containers to communicate on the same Docker host.
-    \item \textbf{host} - The host network is provided by the host driver, which instructs Docker not to create any special networking namespace or resources for attached containers. Containers on the host network interact with the host's network stack like uncontained processes. best when the network stack should not be isolated from the Docker host, but you want other aspects of the container to be isolated.
-    \item \textbf{none} - the none network uses the null driver. Containers attached to the network will not have any network connectivity outside themselves.
-    \item \textbf{overlay} - best when you need containers running on different Docker hosts to communicate, or when multiple applications work together using swarm services.
-    \item \textbf{macvlan} - The overlay network driver creates a distributed network among multiple Docker daemon hosts. This network sits on top of (overlays) the host-specific networks, allowing containers connected to it (including swarm service containers) to communicate securely when encryption is enabled. Some applications, especially legacy applications or applications which monitor network traffic, expect to be directly connected to the physical network. In this type of situation, you can use the macvlan network driver to assign a MAC address to each container's virtual network interface, making it appear to be a physical network interface directly connected to the physical network. best when you are migrating from a VM setup or need your containers to look like physical hosts on your network, each with a unique MAC address.
+    \item \texttt{bridge} --- provides an implementation of a 802.1d bridge (layer 2 switch) between containers running on the same machine. The default bridge network maps to an underlying Linux bridge in the host's kernel named "\texttt{docker0}", which is, in it's turn mapped back to an Ethernet interface on the host via port mappings;
+    \item \texttt{host} --- the container's network stack is not isolated from Docker's host. This driver instructs Docker not to create any networking namespace or resource for attached containers. Containers on this network will interact with the host's network just like uncontained processes. Despite this, all the other aspects of the container will be isolated;
+    \item \texttt{overlay} --- Connects Docker daemons running on different hosts, widely used swarm services are used;
+    \item \texttt{macvlan} --- allows to attach a \acs{MAC} address to a container, making it appear as a physical device on the network;
+    \item \texttt{ipvlan} ---gives the user complete control over IPv4 and IPv6 addressing;
+    \item \texttt{none} --- uses the null driver, meaning the containers attached to the network won't have any network connection outside themselves.
 \end{itemize}
+\placeholder{To do: add docker site sources}
 
-The scope of a network can take three values: local, global, or swarm.
-
-This indicates whether the network is constrained to the machine where the network exists (local), should be created on every node in a cluster but not route between them (global), or seamlessly spans all of the hosts participating in a Docker swarm (multi-host or cluster-wide).
-
-the default networks have the local scope, and will not be able to directly route traffic between containers running on different machines.
-
-\placeholder{End draft of network}
+These configurations fall under three categories: local, global or swarm. This indicates whether the network is constrained to the machine where the network exists (local), should be created on every node in a cluster but not route between them (global), or seamlessly spans all of the hosts participating in a Docker swarm (multi-host or cluster-wide). The default networks have the local scope, and will not be able to directly route traffic between containers running on different machines.
