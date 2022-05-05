@@ -100,7 +100,7 @@ Volumes are created and managed by Docker and are stored within a folder on the 
 On the other hand, bind mounts consist on directories on the host machine being mounted into a container. This mounts are limited in functionality, as they are not managed by Docker itself.
 
 \placeholder{Connect section to Networking, if possible}
-
+% https://docs.docker.com/storage/storagedriver/
 
 
 \subsection{Networking}
@@ -145,4 +145,4 @@ It's possible to implement and use 3rd-party drivers, but Docker is shipped with
 \end{itemize}
 \placeholder{To do: add docker site sources}
 
-These configurations fall under three categories: local, global or swarm. This indicates whether the network is constrained to the machine where the network exists (local), should be created on every node in a cluster but not route between them (global), or seamlessly spans all of the hosts participating in a Docker swarm (multi-host or cluster-wide). The default networks have the local scope, and will not be able to directly route traffic between containers running on different machines.
+These configurations fall under three categories: local, global or swarm. This indicates whether the network is constrained to the machine where the network exists (local), should be created on every node in a cluster but not route between them (global), or seamlessly spans all of the hosts participating in a Docker swarm (multi-host or cluster-wide). The default networks have a local scope, and will not be able to directly route traffic between containers running on different machines.

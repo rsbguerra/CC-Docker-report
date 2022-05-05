@@ -7,21 +7,31 @@
 %     3. Secure Computing Mode
 %     4. SElinux and AppArmor
 
-\placeholder{Begin draft}
 \subsection{cgroups}
 \label{ssec::security:cgroups}
-fundamental building blocks that are used to make containers: control groups,
 
-Cgroups limit the resources, such as memory, CPU, and network input/output, that a group of processes can use. From a security perspective, well-tuned cgroups can ensure that one process can't affect the behavior of other processes by hogging all the resources
+Docker relies on cgroups to limit a container's resources, such as memory, swap, \acs{CPU}, storage and network I/O. cgroups are built into the Linux kernel and this mechanism assures that one container process can't affect the performance of the other processes running on the host machine. In the official kernel documentation it is defined as:
+\begin{displayquote}
+    \textit{"A mechanism for aggregating/partitioning sets of tasks and all their future children into hierarchical groups with specialized behavior."}
+\end{displayquote}
+This hierarchy can be displayed in the figure \ref{fig:cgroup-hch}.
 
-Docker automatically creates its own cgroups of each type.
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.25\textwidth]{cgroup.png}
+    \caption{Scheme representing Linux cgroup hierarchy\cite{fig-src:cgroups}. Here, the \acs{CPU} resources are split across two tasks, the latter having two child processes. The process \texttt{c3}, for instance, cannot access resources allocated for neither \texttt{c4} or \texttt{c1}. It is constrained to the resources inherited from \texttt{c2}.}
+    \label{fig:cgroup-hch}
+\end{figure}
 
-When you start a container, it automatically creates another set of cgroups within the docker cgroups. Create a container and give it a memory limit that we can observe within the memory cgroup.
+When a container is created, Docker automatically assigns a cgroup unique to that container and all the processes of that container will be in the same group.
 
-Constraining resources provides protection against a class of attacks that attempt to disrupt your deployment by consuming excessive resources, thereby starving legitimate applications. It's recommended that you set memory and CPU limits when you run your container applications.
+Constraining resources protects against a class of attacks that attempt to disrupt the system by consuming excessive resources, starving the legitimate applications. It's recommended to set CPU and memory limits in each container when deploying container applications.
+
 
 \subsection{Namespaces}
 \label{ssec::security:namespaces}
+
+\placeholder{Begin draft}
 
 Kernel namespaces are at the very heart of containers! They let us slice up an operating system (OS) so that it looks and feels like multiple isolated operating systems.
 
