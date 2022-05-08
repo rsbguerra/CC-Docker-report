@@ -1,11 +1,13 @@
-\section{Docker Security}
-\label{sec::security}
 
 % 4. Docker security
 %     1. UID 0
 %     2. Privileged Containers
 %     3. Secure Computing Mode
 %     4. SElinux and AppArmor
+\section{Docker Security}
+\label{sec::security}
+
+\placeholder{Add security intro}
 
 \subsection{cgroups}
 \label{ssec::security:cgroups}
@@ -31,71 +33,45 @@ Constraining resources protects against a class of attacks that attempt to disru
 \subsection{Namespaces}
 \label{ssec::security:namespaces}
 
-\placeholder{Begin draft}
+A Linux namespace groups a set of global resources in a layer of abstraction so to appear that the processes wrapped in that namespace do not affect the resources not encompassed in that namespace. A process running in a given namespace cannot see or use the resources out of the boundaries set by that namespace.
 
-Kernel namespaces are at the very heart of containers! They let us slice up an operating system (OS) so that it looks and feels like multiple isolated operating systems.
+This tool is the very core of containerization. It allows Docker to divide the \ac{OS} so it appears multiple isolated \acp{OS}. Rather than having a single namespace, Docker containers set up a namespace for each of the six types of resources, these being:
 
-namespaces control what it can see. By putting a process in a namespace, you can restrict the resources that are visible to that process.
-
-Unix systems allowed the mounting of filesystems, but they would all be mounted into the same system-wide view of all filenames. In Plan 9, each process was part of a process group that had its own “name space” abstraction, the hierarchy of files (and file-like objects) that this group of processes could see. Each process group could mount its own set of file systems without seeing each other.
-
-There are several different kinds of namespace supported by Linux:
 \begin{itemize}
-    \item Unix Timesharing System (UTS)—this sounds complicated, but to all intents and purposes this namespace is really just about the hostname and domain names for the system that a process is aware of.
-    \item Process IDs
-    \item Mount points
-    \item Network
-    \item User and group IDs
-    \item Inter-process communications (IPC)
-    \item  Control groups (cgroups)
+    \item \textbf{\ac{PID} namespace} --- Docker creates \ac{PID} namespace to provide isolated process trees for each container;
+    \item \textbf{Mount namespace} --- Each container contains it's own isolated root \texttt{\textbackslash} filesystem. Each process can only access its own isolated mount namespace;
+    \item \textbf{\ac{IPC} namespace} --- Allows Docker to manage shared memory both within and outside the container;
+    \item \textbf{User namespaces} --- Docker is able to map container users to different users on the Linux host;
+    \item \textbf{\ac{UTS} namespace} --- Gives the container its own hostname and domain name. By providing a process running within the container its own \ac{UTS}, it's possible to change the host name of that process without affecting the rest of the system;
+    \item \textbf{Network namespace} --- Each container is provided their own isolated network stack, including \acs{IP} address, port ranges and routing table.
 \end{itemize}
 
-Let's briefly look at how Docker uses each namespace:
-\begin{itemize}
-    \item Process ID namespace: Docker uses the pid namespace to provide isolated process trees for each container. Every container gets its own process tree, meaning that every container can have its own PID 1. PID namespaces also mean that a container cannot see or access to the process tree of other containers, or the host it's running on.
-    \item Network namespace: Docker uses the net namespace to provide each container its own isolated network stack. This stack includes; interfaces, IP addresses, port ranges, and routing tables. For example, every container gets its own eth0 interface with its own unique IP and range of ports.
-    \item Mount namespace: Every container gets its own unique isolated root / filesystem. This means that every container can have its own /etc, /var, /dev etc. Processes inside of a container cannot access the mount namespace of the Linux host or other containers — they can only see and access their own isolated mount namespace.
-    \item Inter-process Communication namespace: Docker uses the ipc namespace for shared memory access within a container. It also isolates the container from shared memory outside of the container.
-    \item User namespace: Docker lets you use user namespaces to map users inside of a container to different users on the Linux host. A common example is mapping the root user of a container to a non-root user on the Linux host.
-    \item User namespaces are quite new to Docker and currently optional. This may change in the future.
-    \item UTS namespace: Docker uses the uts namespace to provide each container with its own hostname.  By putting a process in its own UTS namespace, you can change the hostname for this process independently of the hostname of the machine or virtual machine on which it's running The container can have its own hostname because Docker created it with its own UTS namespace
-\end{itemize}
-
-\subsection{UID 0}
-\label{ssec::security:uid0}
-
-The user namespace allows processes to have their own view of user and group IDs. Much like process IDs, the users and groups still exist on the host, but they can have different IDs. The main benefit of this is that you can map the root ID of 0 within a container to some other non-root identity on the host. This is a huge advantage from a security perspective, since it allows software to run as root inside a container, but an attacker who escapes from the container to the host will have a non-root, unprivileged identity.
-
-User namespaces allow an unprivileged user to effectively become root within the
-containerized process. This allows a normal user to run containers using a concept called rootless containers, The general consensus is that user namespaces are a security benefit because fewer containers need to run as “real” root
-
-\subsection{Privileged Containers}
-\label{ssec::security:priv-cont}
-
-\placeholder{TODO}
 
 \subsection{Secure Computing Mode}
 \label{ssec::security:sec-compt}
-\placeholder{TODO}
+
+Seccomp (short for secure computing mode) is a Linux mechanism that filters the system calls an application is allowed to make. Each process in seccomp mode is applied a profile that determines what action must be taken when a give system call is matched to the process' profile. When a action is matched, it can either return an error, terminate the process or call a tracer.
+
+Docker applies a default seccomp profile that blocks more than 40 system calls that are undesirable to have a container execute. For instance, a container shouldn't be able to alter the host's clock, so Docker's profile blocks the \texttt{clock\_adjtime} and \texttt{clock\_settime} calls \cite{Rice2020-kl}.
+
+The complete list of system calls can be found in Docker's documentation \cite{docker-seccomp}.
+
 
 \subsection{Mandatory Access Control}
 \label{ssec::security:sel-apparm}
 
-Using mandatory access controls gives the administrator much more granular control of what can happen on their system, in a way that individual users can't override.
+Mandatory Access Control is a class of security system where a system wide security policy grants users access to a given resource. This mechanism gives the administrator more granular control over their system in a way individual users can't override.
+
+Docker supports two major Linux Mandatory Access Control technologies, these being AppArmor and SELinux.
 
 \subsubsection{\textbf{AppArmor}}
-AppArmor (short for “Application Armor”) is one of a handful of Linux security
-modules (LSM) that can be enabled in the Linux kernel. In AppArmor, a profile can be associated with an executable file, determining what that file is allowed to do in terms of capabilities and file access permissions. AppArmor and other LSMs implement mandatory access controls. A mandatory access control is set by a central administrator, and once set, other users do not have any ability to modify the control or pass it on to another user.
 
-AppArmor includes a “complain” mode in which you can run your executable against a profile and any violations get logged. The idea is that you can use these logs to update the profile, with the goal of eventually seeing no new violations, at which point you start to enforce the profile.
+One of the \ac{LSM} available in the Linux kernel where an executable file can be associated with a profile, defining what that file is allowed to access. It also allows any violations to logged \cite{ubuntu-apparmor}. A default profile is automatically applied to containers, it provides a wide application compatibility and moderate protection \cite{docker-apparmor}.
 
 \subsubsection{\textbf{SELinux}}
-SElinux lets you constrain what a process is allowed to do in terms of its interactions with files and other processes. Each process runs under an SELinux domain—you can think of this as the context that the process is running in—and every file has a type.
-
-A key distinction between SELinux permissions and regular DAC Linux permissions is that in SELinux, permissions have nothing to do with the user identity—they are described entirely by labels. That said, they work together, so an action has to be permitted by both DAC and SELinux.
+\placeholder{Begin draft}
+SElinux lets you constrain what a process is allowed to do in terms of its interactions with files and other processes. Each process runs under an SELinux domain and every file has a type.
 
 Creating an effective SELinux profile for an application takes in-depth knowledge of the set of files that it might need access to, in both happy and error paths, so that task may be best left to the app developer. Some vendors provide profiles for their applications.
-
-
 
 \placeholder{End draft}
