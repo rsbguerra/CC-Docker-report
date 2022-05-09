@@ -72,15 +72,124 @@
   url   = {https://docs.docker.com/storage/},
   year  = 2022
 }
+@electronic{docker-seccomp,
+  title = {Seccomp security profiles for Docker},
+  url   = {https://docs.docker.com/engine/security/seccomp/},
+  year  = 2022
+}
+@electronic{ubuntu-apparmor,
+  title = {AppArmor},
+  url   = {https://wiki.ubuntu.com/AppArmor},
+  year  = 2022
+}
+@electronic{docker-apparmor,
+  title = {AppArmor security profiles for Docker },
+  url   = {https://docs.docker.com/engine/security/apparmor/},
+  year  = 2022
+}
+@electronic{selinux,
+  title    = {Container SELinux --- Security Enhanced Linux Policy for the container processes},
+  url      = {https://www.mankier.com/8/container_selinux},
+  year     = 2022
+}
+@electronic{container-networking,
+  title    = {Container networking},
+  url      = {https://docs.docker.com/config/containers/container-networking/},
+  year     = 2022
+}
+@electronic{network-drivers,
+  title    = {Networking overview},
+  url      = {https://docs.docker.com/network/},
+  year     = 2022
+}
+@electronic{network-bridge,
+  title    = {Use bridge networks},
+  url      = {https://docs.docker.com/network/bridge/},
+  year     = 2022
+}
+@electronic{network-host,
+  title    = {Use host networking},
+  url      = {https://docs.docker.com/network/host/},
+  year     = 2022
+}
+@electronic{network-overlay,
+  title    = {Use overlay networking},
+  url      = {https://docs.docker.com/network/host/},
+  year     = 2022
+}
+@electronic{network-mac,
+  title    = {Use macvlan networking},
+  url      = {https://docs.docker.com/network/macvlan/},
+  year     = 2022
+}
+@electronic{network-ipvlan,
+  title    = {Use ipvaln networking},
+  url      = {https://docs.docker.com/network/ipvlan/},
+  year     = 2022
+}
+@electronic{cgroup-man,
+  title    = {cgroups(7) --- Linux manual page},
+  url      = {https://www.man7.org/linux/man-pages/man7/cgroups.7.html},
+  year     = 2021
+}
+@electronic{docker-cgroups,
+  title    = {Docker security --- Control Groups},
+  url      = {https://docs.docker.com/engine/security/#control-groups},
+  year     = 2021
+}
+@electronic{seccomp-man,
+  title    = {seccomp(2) --- Linux manual page},
+  url      = {https://man7.org/linux/man-pages/man2/seccomp.2.html},
+  year     = 2021
+}
+@electronic{namespaces,
+  title    = {Namespaces in operation, part 5: User namespaces},
+  author   = {Michael Kerrisk},
+  url      = {https://lwn.net/Articles/532593/},
+  year     = 2013
+}
+@electronic{namespaces-linux,
+  title    = {Namespaces in operation, part 5: User namespaces},
+  author   = {Michael Kerrisk},
+  url      = {https://lwn.net/Articles/532593/},
+  year     = 2013
+}
+@electronic{namespaces-docker,
+  title    = {Isolate containers with a user namespace --- Docker Documentation},
+  url      = {https://docs.docker.com/engine/security/userns-remap/},
+  year     = 2022
+}
+@electronic{storage-driver,
+  title    = {About storage drivers --- Docker Documentation},
+  url      = {https://docs.docker.com/storage/storagedriver/},
+  year     = 2022
+}
 
 ! Figures --------
+@electronic{fig-src:docker-engine,
+  title = {About storage drivers},
+  url   = {https://sweetcode.io/docker-containerd-orchestration-services/},
+  year  = 2022
+}
 @electronic{fig-src:image-layers,
-  title = {About storage drivers | Docker Documentation},
+  title = {About storage drivers},
   url   = {https://docs.docker.com/storage/storagedriver/},
   year  = 2022
 }
+@electronic{fig-src:cnm,
+  author = {Lee Calcote},
+  title  = {Docker Networking takes a step in the right direction},
+  url    = {https://thenewstack.io/container-networking-landscape-cni-coreos-cnm-docker/},
+  year   = 2016
+}
+@electronic{fig-src:cgroups,
+  author = {Dario Di Pasquale},
+  title  = {Understanding Linux Containers: explore User Space, cgroups and Namespaces},
+  url    = {https://dariodip.medium.com/understanding-linux-containers-a-simple-recipe-7c24cc1137b4},
+  year   = 2021
+}
 
-! Books ----------
+! Books/articles ----------
 
 ! Docker: Up & running
 @book{Kane2018-fn,
@@ -124,10 +233,24 @@
 }
 ! Container security 
 @book{Rice2020-kl,
-  title     = {Container security},
+  title     = {Container security Fundamental Technology Concepts that Protect Containerized Applications},
   author    = {Rice, Liz},
   publisher = {O'Reilly Media},
   month     = apr,
   year      = 2020,
   address   = {Sebastopol, CA}
+}
+
+@article{Belim2018,
+  author    = {S. V. Belim and S. Yu. Belim},
+  doi       = {10.3103/s0146411618080357},
+  journal   = {Automatic Control and Computer Sciences},
+  month     = dec,
+  number    = {8},
+  pages     = {1124--1126},
+  publisher = {Allerton Press},
+  title     = {Implementation of Mandatory Access Control in Distributed Systems},
+  url       = {https://doi.org/10.3103/s0146411618080357},
+  volume    = {52},
+  year      = {2018}
 }

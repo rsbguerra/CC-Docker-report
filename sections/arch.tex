@@ -1,8 +1,6 @@
 \section{Docker Architecture}
 \label{sec::arch}
 
-\placeholder{Architecture intro}
-
 % 3. Docker Architecture
 %     1. The Docker engine
 %         1. Client server
@@ -37,17 +35,18 @@ Within this architecture, the Docker daemon is the component responsible for cre
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=0.25\textwidth]{docker_engine.png}
-    \caption{Current and planned container use for all organizations.}
+    \caption{Diagram representing the Docker Engine architecture\cite{fig-src:docker-engine}.}
     \label{fig::docker-engine-server}
 \end{figure}
 
-Despite being, at its core, a client-server architecture, Docker's server is far from monolithic, as shown in figure \ref{fig::docker-engine-server}. The server operates a set of smaller components, among them \texttt{runc} and \texttt{containerd}, the main modules responsible for creating and running containers. Both implement as closely as possible the OCI open source project specifications\cite{Poulton2020-ju, oci-runc, git-runc, docker-containerd}.
+Despite being, at its core, a client-server architecture, Docker's server is far from monolithic (figure \ref{fig::docker-engine-server}). The server operates a set of smaller components, among them \texttt{runc} and \texttt{containerd}, the main modules responsible for creating and running containers. Both implement as closely as possible the OCI open source project specifications~\cite{Poulton2020-ju, oci-runc, git-runc, docker-containerd}.
 
 The first program, \texttt{runc}, is a \acs{CLI} component responsible for creating and running applications. Its purpose is to be a standalone low-level tool called by any high-level application, such as Docker. In order to achieve this, \texttt{runc} relies on the library \texttt{libcontainer} to access the container isolation features of the \acs{OS}, such as \texttt{seccomp} and user namespaces\cite{runc-estes}.
 
 Secondly, \texttt{containerd} is responsible for managing all the container execution logic, such as starting, stopping and removing containers. In the same way as \texttt{runc}, \texttt{containerd} is available as a standalone daemon and was intended to be a lightweight program with the sole role of managing container lifetime operations. But as it grew, it gained new functionalities, such as data storage and image management\cite{docker-containerd}.
 
 With this in mind, it's possible to understand the container creation workflow. When a command is typed in the \acs{CLI}, the Docker client converts the instructions into the \acs{API} payload and POSTs to the correct API endpoint. Once the daemon receives the command to create a new container, a call is made to \texttt{containerd}, which converts the required Docker image into a bundle and instructs \texttt{runc} to create a new container. In its turn, \texttt{runc} interfaces with the \acs{OS} kernel to allocate the resources and to execute the instructions needed to create a new container. The container process is started as a child-process of \texttt{runc}, and as soon as it is started, \texttt{runc} is terminated.
+
 
 
 \subsection{Containers}
@@ -58,19 +57,7 @@ Despite the behavior similarities between containers and \acsp{VM}, they are fun
 
 However, it's only possible to run processes that are compatible with the underlining kernel, \ie~ a Windows container cannot run Linux application and vice versa.
 
-% \subsection{Container Lifecycle}
-% \placeholder{Dockerfile}
-% 
-% \placeholder{docker compose}
-% containers follow the same process group signal propagations that any other process group would recieve on linux
-% auto restarting a continer?
-% normal docker stop sends a SIGTERM to kill the container
-% docker stop initially sends sigterm signal, if the container as not stopped within 25 seconds, a SIGKILL signal is sent to forcefully kill it
-% if docker kill wont stop the container, docker kill is used
 
-% The Dockerfile has two main purposes:
-% 1. To describe the application
-% 2. To tell Docker how to containerize the application (create an image with the app inside)
 
 \subsection{Images}
 \label{sec::arch:images}
@@ -89,8 +76,11 @@ A layer is identified by a digest, referred to as \textit{Content Addressable ID
 
 These layers are described in the image manifests, which are \acs{JSON} files containing both information about the image's layers and a list of compatible architectures given by an image tag \cite{image-manifest}.
 
-\placeholder{Use image storage driver to connect to next section}
-% https://docs.docker.com/storage/storagedriver/
+Docker uses a storage driver to store and manage image layers. This component is also responsible for writing on the write layer of the image. The data written by the storage driver does not persists after the container is deleted, thus being more suitable for storing data generated during the application runtime\cite{storage-driver}.
+
+For applications that require persistent storage, even when the container is deleted, or if necessary to supply other containers access to that data, it's required to create a volume.
+
+
 
 \subsection{Volumes and persistent data}
 \label{sec::arch:volumes}
@@ -101,17 +91,46 @@ Volumes are created and managed by Docker and are stored within a folder on the 
 
 On the other hand, bind mounts consist on directories on the host machine being mounted into a container. This mounts are limited in functionality, as they are not managed by Docker itself.
 
-\placeholder{Connect section to Networking, if possible}
+
 
 \subsection{Networking}
 \label{ssec::arch:net}
 
-Different types of bridge networking:
+Docker containers are able to establish network connections both between one or various containers, or between non-container networks. When a container is attached to a Docker network, an unique \acs{IP} address is attributed to said container. Docker networks are regarded as first-class entities, each having their own life cycle and are not dependent on other components, being composed by three main modules\cite{Poulton2020-ju}:
 
 \begin{itemize}
-    \item bridge
-    \item host
-    \item overlay
-    \item macvlan
+    \item \textbf{\ac{CNM}} --- the network's design specifications which outlines the fundamental building blocks of a docker network;
+    \item \textbf{\texttt{libnetwork}} --- native Go implementation of the core components outlined in the \ac{CNM};
+    \item \textbf{Network drivers} --- pluggable interfaces that provide the networking subsystem.
 \end{itemize}
 
+To fully comprehend the different network configurations available, it's important the underlining building blocks of the \ac{CNM} interface. Each container defines a \textbf{network sandbox}, which is an isolated environment containing the networking configuration of the container, including ethernet interfaces, ports, routing tables and \acs{DNS} configuration. A network sandbox may contain multiple \textbf{endpoints}, the virtual network interfaces responsible for maintaining the connection between the sandbox and a given network. A \textbf{network} is a uniquely identifiable group of endpoints capable of communicating with each other, connecting different networking sandboxes.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.45\textwidth]{cnm-interface.png}
+    \caption{Diagram representing the architecture of \ac{CNM} \cite{fig-src:cnm}.}
+    \label{fig:cnm-interface}
+\end{figure}
+
+Based on these building blocks, the \texttt{libnetwork} is the core implementation of the networking functionalities defined by the \ac{CNM}. The drivers are responsible for handling the connectivity and isolation of the network objects (figure \ref{fig:cnm-drivers}).
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.45\textwidth]{cnm-drivers.png}
+    \caption{Diagram demonstrating how the Docker deamon interacts with the various drivers via the \texttt{libnetwork} \cite{fig-src:cnm}.}
+    \label{fig:cnm-drivers}
+\end{figure}
+
+It's possible to implement and use 3rd-party drivers, but Docker is shipped with several built-in drivers, known as native or local drivers\cite{network-drivers}. These being:
+
+\begin{itemize}
+    \item \texttt{bridge} --- provides an implementation of a 802.1d bridge (layer 2 switch) between containers running on the same machine. The default bridge network maps to an underlying Linux bridge in the host's kernel named "\texttt{docker0}", which is, in it's turn mapped back to an Ethernet interface on the host via port mappings\cite{network-bridge};
+    \item \texttt{host} --- the container's network stack is not isolated from Docker's host. This driver instructs Docker not to create any networking namespace or resource for attached containers. Containers on this network will interact with the host's network just like uncontained processes. Despite this, all the other aspects of the container will be isolated\cite{network-host};
+    \item \texttt{overlay} --- Connects Docker daemons running on different hosts, widely used swarm services are used \cite{network-overlay};
+    \item \texttt{macvlan} --- allows to attach a \acs{MAC} address to a container, making it appear as a physical device on the network\cite{network-mac};
+    \item \texttt{ipvlan} ---gives the user complete control over IPv4 and IPv6 addressing\cite{network-ipvlan};
+    \item \texttt{none} --- uses the null driver, meaning the containers attached to the network won't have any network connection outside themselves.
+\end{itemize}
+
+These configurations fall under three categories: local, global or swarm. This indicates whether the network is constrained to the machine where the network exists (local), should be created on every node in a cluster but not route between them (global), or seamlessly spans all of the hosts participating in a Docker swarm (multi-host or cluster-wide)\cite{Poulton2020-ju}. The default networks have a local scope, and will not be able to directly route traffic between containers running on different machines\cite{network-drivers}.
