@@ -35,11 +35,11 @@ Within this architecture, the Docker daemon is the component responsible for cre
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=0.25\textwidth]{docker_engine.png}
-    \caption{Diagram representing the Docker Engine architecture\cite{fig-src:docker-engine}.}
+    \caption{Diagram representative of the Docker Engine architecture\cite{fig-src:docker-engine}.}
     \label{fig::docker-engine-server}
 \end{figure}
 
-Despite being, at its core, a client-server architecture, Docker's server is far from monolithic (figure \ref{fig::docker-engine-server}). The server operates a set of smaller components, among them \texttt{runc} and \texttt{containerd}, the main modules responsible for creating and running containers. Both implement as closely as possible the OCI open source project specifications~\cite{Poulton2020-ju, oci-runc, git-runc, docker-containerd}.
+Despite being, at its core, a client-server architecture, Docker's server is far from monolithic (figure \ref{fig::docker-engine-server}). The server operates a set of smaller components, among them \texttt{runc} and \texttt{containerd}, the main modules responsible for creating and running containers. Both implement as closely as possible the \ac{OCI} open source project specifications~\cite{Poulton2020-ju, oci-runc, git-runc, docker-containerd}.
 
 The first program, \texttt{runc}, is a \acs{CLI} component responsible for creating and running applications. Its purpose is to be a standalone low-level tool called by any high-level application, such as Docker. In order to achieve this, \texttt{runc} relies on the library \texttt{libcontainer} to access the container isolation features of the \acs{OS}, such as \texttt{seccomp} and user namespaces\cite{runc-estes}.
 
@@ -51,7 +51,11 @@ With this in mind, it's possible to understand the container creation workflow. 
 
 \subsection{Containers}
 \label{sec::arch:containers}
-As defined by the \texttt{libcontainer} README page, a container is "a self-contained execution environment that shares the kernel of the host system and is optionally isolated from other containers in the system"\cite{docker-libcontainer}.
+As defined by the \texttt{libcontainer} README page\cite{docker-libcontainer}:
+
+\begin{displayquote}
+    \textit{"A container is a self-contained execution environment that shares the kernel of the host system and is optionally isolated from other containers in the system."}
+\end{displayquote}
 
 Despite the behavior similarities between containers and \acsp{VM}, they are fundamentally different since all the containers running in the system share the same kernel, so the isolation between workloads is implemented within that one kernel. As a result, there is one less layer of abstraction between the isolated task and the hardware underneath, which results in better resource efficiency.
 
