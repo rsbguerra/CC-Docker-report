@@ -22,6 +22,7 @@
 
 \subsection{Docker Engine}
 \label{sec::arch:engine}
+
 The Docker Engine is the core software responsible for running and managing containers, which consists of several modular components\cite{Docker-engine}. It is implemented as a client-server application, consisting of:
 
 \begin{itemize}
@@ -51,21 +52,23 @@ With this in mind, it's possible to understand the container creation workflow. 
 
 \subsection{Containers}
 \label{sec::arch:containers}
+
 As defined by the \texttt{libcontainer} README page\cite{docker-libcontainer}:
 
 \begin{displayquote}
-    \textit{"A container is a self-contained execution environment that shares the kernel of the host system and is optionally isolated from other containers in the system."}
+    ``\textit{A container is a self-contained execution environment that shares the kernel of the host system and is optionally isolated from other containers in the system.}''
 \end{displayquote}
 
 Despite the behavior similarities between containers and \acsp{VM}, they are fundamentally different since all the containers running in the system share the same kernel, so the isolation between workloads is implemented within that one kernel. As a result, there is one less layer of abstraction between the isolated task and the hardware underneath, which results in better resource efficiency.
 
-However, it's only possible to run processes that are compatible with the underlining kernel, \ie~ a Windows container cannot run Linux application and vice versa.
+However, it's only possible to run processes that are compatible with the underlining kernel, \ie~ a Windows container cannot run Linux application and vice-versa.
 
 
 
 \subsection{Images}
 \label{sec::arch:images}
-Docker images are a template of what is reconstructed into a running container, it serves as a base for everything that will be deployed and run on the container, similarly to a filesystem \cite{Kane2018-fn}. Before launching a container, the image must be built from scratch or downloaded from a public registry. When the \texttt{docker pull} command is used, the default registry used is the official Docker Hub \cite{docker-hub}.
+
+Docker images are a template of what is reconstructed into a running container; it serves as a base for everything that will be deployed and run on the container, similarly to a filesystem \cite{Kane2018-fn}. Before launching a container, the image must be built from scratch or downloaded from a public registry. When the \texttt{docker pull} command is used, the default registry used is the official Docker Hub \cite{docker-hub}.
 
 An image consists of multiple read-only layers; each layer represents the changes made to the underlining system, \ie~ a \texttt{diff} of the previous layer \cite{images-layers}. When a container is created, a new read-write layer is added on top of the previous ones, so that all the changes made during the container execution are saved on disk (figure \ref{fig:docker-image}) \cite{fig-src:image-layers}.
 
@@ -74,13 +77,13 @@ A layer is identified by a digest, referred to as \textit{Content Addressable ID
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=0.45\textwidth]{container-layers.jpg}
-    \caption{Diagram exemplificative of a Docker image composition, where the set of layers composes an Ubuntu container \cite{fig-src:image-layers}.}
+    \caption{Diagram exemplifying a Docker image composition, where the set of layers composes an Ubuntu container \cite{fig-src:image-layers}.}
     \label{fig:docker-image}
 \end{figure}
 
 These layers are described in the image manifests, which are \acs{JSON} files containing both information about the image's layers and a list of compatible architectures given by an image tag \cite{image-manifest}.
 
-Docker uses a storage driver to store and manage image layers. This component is also responsible for writing on the write layer of the image. The data written by the storage driver does not persists after the container is deleted, thus being more suitable for storing data generated during the application runtime\cite{storage-driver}.
+Docker uses a storage driver to store and manage image layers. This component is also responsible for writing on the write-layer of the image. The data written by the storage driver does not persist after the container is deleted, thus being more suitable for storing data generated during application runtime\cite{storage-driver}.
 
 For applications that require persistent storage, even when the container is deleted, or if necessary to supply other containers access to that data, it's required to create a volume.
 
@@ -89,18 +92,18 @@ For applications that require persistent storage, even when the container is del
 \subsection{Volumes and persistent data}
 \label{sec::arch:volumes}
 
-When a container is created, the system automatically allocates local storage where the container's filesystem is stored. However, this integral part of the container is tied to it's lifecycle, it will be deleted as soon the container itself is deleted. By default, the container uses only this local storage. If persistent storage is needed, there are two options for containers to store data on the host device: volumes and bind mounts\cite{container-storage}.
+When a container is created, the system automatically allocates local storage where the container's filesystem is stored. However, this integral part of the container is tied to it's lifecycle: it will be deleted as soon the container itself is deleted. By default, the container only uses such local storage. If data persistence is needed, there are two options for containers to store data on the host device: volumes and bind mounts\cite{container-storage}.
 
 Volumes are created and managed by Docker and are stored within a folder on the host machine. As volumes are only managed by Docker, this means they are isolated from the host and only Docker is allowed to write any change made to the volume. It's possible to mount a single volume into multiple containers. When a given volume isn't being used by any container it won't be removed automatically.
 
-On the other hand, bind mounts consist on directories on the host machine being mounted into a container. This mounts are limited in functionality, as they are not managed by Docker itself.
+On the other hand, bind mounts consist on directories on the host machine being mounted into a container. This mounts are limited in functionality as they are not managed by Docker itself.
 
 
 
 \subsection{Networking}
 \label{ssec::arch:net}
 
-Docker containers are able to establish network connections both between one or various containers, or between non-container networks. When a container is attached to a Docker network, an unique \acs{IP} address is attributed to said container. Docker networks are regarded as first-class entities, each having their own life cycle and are not dependent on other components, being composed by three main modules\cite{Poulton2020-ju}:
+Docker containers are able to establish network connections both between one or various containers, and non-container networks. When a container is attached to a Docker network, an unique \acs{IP} address is attributed to said container. Docker networks are regarded as first-class entities, each having their own life cycle, and are not dependent on other components, being composed of three main modules\cite{Poulton2020-ju}:
 
 \begin{itemize}
     \item \textbf{\ac{CNM}} --- the network's design specifications which outlines the fundamental building blocks of a docker network;
@@ -108,7 +111,7 @@ Docker containers are able to establish network connections both between one or 
     \item \textbf{Network drivers} --- pluggable interfaces that provide the networking subsystem.
 \end{itemize}
 
-To fully comprehend the different network configurations available, it's important the underlining building blocks of the \ac{CNM} interface. Each container defines a \textbf{network sandbox}, which is an isolated environment containing the networking configuration of the container, including ethernet interfaces, ports, routing tables and \acs{DNS} configuration. A network sandbox may contain multiple \textbf{endpoints}, the virtual network interfaces responsible for maintaining the connection between the sandbox and a given network. A \textbf{network} is a uniquely identifiable group of endpoints capable of communicating with each other, connecting different networking sandboxes.
+To fully comprehend the different network configurations available, it's important the underlining building blocks of the \ac{CNM} interface. Each container defines a \textbf{network sandbox}, which is an isolated environment containing the networking configuration of the container, including Ethernet interfaces, ports, routing tables and \acs{DNS} configuration. A network sandbox may contain multiple \textbf{endpoints}, \ie~the virtual network interfaces responsible for maintaining the connection between the sandbox and a given network. A \textbf{network} is a uniquely identifiable group of endpoints capable of communicating with each other, connecting different networking sandboxes.
 
 \begin{figure}[!htb]
     \centering
@@ -126,15 +129,20 @@ Based on these building blocks, the \texttt{libnetwork} is the core implementati
     \label{fig:cnm-drivers}
 \end{figure}
 
-It's possible to implement and use 3rd-party drivers, but Docker is shipped with several built-in drivers, known as native or local drivers\cite{network-drivers}. These being:
+It's possible to implement and use 3rd-party drivers, but Docker is shipped with several built-in drivers, known as native or local drivers\cite{network-drivers}. These include:
 
 \begin{itemize}
-    \item \texttt{bridge} --- provides an implementation of a 802.1d bridge (layer 2 switch) between containers running on the same machine. The default bridge network maps to an underlying Linux bridge in the host's kernel named "\texttt{docker0}", which is, in it's turn mapped back to an Ethernet interface on the host via port mappings\cite{network-bridge};
-    \item \texttt{host} --- the container's network stack is not isolated from Docker's host. This driver instructs Docker not to create any networking namespace or resource for attached containers. Containers on this network will interact with the host's network just like uncontained processes. Despite this, all the other aspects of the container will be isolated\cite{network-host};
-    \item \texttt{overlay} --- Connects Docker daemons running on different hosts, widely used swarm services are used \cite{network-overlay};
+    \item \texttt{bridge} --- provides an implementation of a 802.1d bridge (layer 2 switch) between containers running on the same machine. The default bridge network maps to an underlying Linux bridge in the host's kernel named ``\texttt{docker0}'', which is in its turn mapped back to an Ethernet interface on the host via port mappings\cite{network-bridge};
+    
+    \item \texttt{host} --- the container's network stack is not isolated from Docker's host. This driver instructs Docker not to create any networking namespace or resource for attached containers. Containers on this network will interact with the host's network just like uncontained processes. Despite this, all the other aspects of the container will be isolated \cite{network-host};
+    
+    \item \texttt{overlay} --- connects Docker daemons running on different hosts; widely used on swarm services \cite{network-overlay};
+    
     \item \texttt{macvlan} --- allows to attach a \acs{MAC} address to a container, making it appear as a physical device on the network\cite{network-mac};
+    
     \item \texttt{ipvlan} ---gives the user complete control over IPv4 and IPv6 addressing\cite{network-ipvlan};
+    
     \item \texttt{none} --- uses the null driver, meaning the containers attached to the network won't have any network connection outside themselves.
 \end{itemize}
 
-These configurations fall under three categories: local, global or swarm. This indicates whether the network is constrained to the machine where the network exists (local), should be created on every node in a cluster but not route between them (global), or seamlessly spans all of the hosts participating in a Docker swarm (multi-host or cluster-wide)\cite{Poulton2020-ju}. The default networks have a local scope, and will not be able to directly route traffic between containers running on different machines\cite{network-drivers}.
+These configurations fall under three categories: local, global or swarm. It indicates whether the network is constrained to the machine where the network exists (local), should be created on every node in a cluster but not route between them (global), or seamlessly spans all of the hosts participating in a Docker swarm (multi-host or cluster-wide)\cite{Poulton2020-ju}. The default networks have a local scope, and will not be able to directly route traffic between containers running on different machines\cite{network-drivers}.
