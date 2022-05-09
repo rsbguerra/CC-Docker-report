@@ -76,9 +76,9 @@ A layer is identified by a digest, referred to as \textit{Content Addressable ID
 
 These layers are described in the image manifests, which are \acs{JSON} files containing both information about the image's layers and a list of compatible architectures given by an image tag \cite{image-manifest}.
 
-\placeholder{Use image storage driver to connect to next section}
-% https://docs.docker.com/storage/storagedriver/
+Docker uses a storage driver to store and manage image layers. This component is also responsible for writing on the write layer of the image. The data written by the storage driver does not persists after the container is deleted, thus being more suitable for storing data generated during the application runtime\cite{storage-driver}.
 
+For applications that require persistent storage, even when the container is deleted, or if necessary to supply other containers access to that data, it's required to create a volume.
 
 
 
