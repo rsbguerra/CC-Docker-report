@@ -22,7 +22,7 @@
 % TODO:
 % explain libcontainer
 
-\subsection{The Docker Engine}
+\subsection{Docker Engine}
 \label{sec::arch:engine}
 The Docker Engine is the core software responsible for running and managing containers, which consists of several modular components\cite{Docker-engine}. It is implemented as a client-server application, consisting of:
 
@@ -41,7 +41,7 @@ Within this architecture, the Docker daemon is the component responsible for cre
     \label{fig::docker-engine-server}
 \end{figure}
 
-Despite being, at its core, a client-server architecture, Docker's server is far from monolithic, as shown in figure \ref{fig:docker-engine-server}. The server operates a set of smaller components, among them \texttt{runc} and \texttt{containerd}, the main modules responsible for creating and running containers. Both implement as closely as possible the OCI open source project specifications\cite{Poulton2020-ju, oci-runc, git-runc, docker-containerd}.
+Despite being, at its core, a client-server architecture, Docker's server is far from monolithic, as shown in figure \ref{fig::docker-engine-server}. The server operates a set of smaller components, among them \texttt{runc} and \texttt{containerd}, the main modules responsible for creating and running containers. Both implement as closely as possible the OCI open source project specifications\cite{Poulton2020-ju, oci-runc, git-runc, docker-containerd}.
 
 The first program, \texttt{runc}, is a \acs{CLI} component responsible for creating and running applications. Its purpose is to be a standalone low-level tool called by any high-level application, such as Docker. In order to achieve this, \texttt{runc} relies on the library \texttt{libcontainer} to access the container isolation features of the \acs{OS}, such as \texttt{seccomp} and user namespaces\cite{runc-estes}.
 
