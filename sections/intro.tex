@@ -1,27 +1,20 @@
 \section{Introduction}
 \label{sec::intro}
 
-% 2. Background
-%   1. Need for virtualization
-%   2. Containerization vs virtualization
-%   3. docker
-%       1. What is docker
-%       2. What problem docker solves
-%       3. Why is docker important
-%   4. The OCI
+For a long period, ensuring that an application's performance is consistent across multiple \acs{OS}, while managing different versions of \acs{OS}s, programming languages and libraries was almost impossible task. Thus, IT departments started to adopt the use of virtualization. \acp{VM} have solved multiple issues regarding portability and compatibility of applications, but also introduced the concept of application isolation, which allowed multiple applications to be executed in parallel in the same machine without the risk of interference between them, by creating multiple \acp{VM} on the same system.
 
-\subsection{Need for virtualization}
-\label{ssec::intro:need-virt}
+However, virtualization has several drawbacks, the biggest one being the performance degradation due to the heavy nature of virtualizing an entire \acs{OS} or even different architectures. In addition, the need for portability was not fully met with \acp{VM}. Hypervisor software from different vendors creates an additional roadblock to deploying applications regardless of the underlying hardware.
 
-\subsection{Containerization \emph{vs.} Virtualization}
-\label{ssec::intro:cont-vs-virt}
+Therefore, the IT industry has been steadily adopting the use of containerization. Containers provide an lightweight and portable solution containing all the libraries, binaries and other dependencies a given application needs to be deployed without affecting the host's performance.
 
-\subsection{Docker}
-\label{ssec::intro:docker}
+Despite being similar with regard providing some level of isolation from the host's system in order to deploy applications in a greater range of machines, containers and \acs{VM} achieve this in a widely different manner.
 
-% What is docker
-% What problem docker solves
-% Why is docker important
+Containers depend on Linux kernel functionalities to create a thin layer of isolation between the native \acs{OS} and the application. As such, resource sharing is done with greater efficiency, thus maintaining almost bare-metal performance. \acp{VM} are not able to provide this able of efficiency, but they do achieve a greater level of isolation by emulating both hardware and \acs{OS}. Despite not providing the same level of isolated, and consequently, security, the containerization paradigm is an increasingly appealing option. Therefore, Docker enters the picture.
 
-\subsection{OCI}
-\label{ssec::intro:oci}
+The Docker initiative was designed specifically to ease the implementation and automation of creating containers. Hence, Docker is a software that creates, manages and orchestrates containers. It is part of the Moby project, an open-source project available on GitHub. And since it's release in 2013, it's ease of application deployment has continually revolutionized the way software is delivered and run.
+
+Docker's rapid development and adoption created the need of standardizing the container and image creation. Therefore, a council has been created with the goal of governing the containerization standards --- the \ac{OCI}.
+
+Given the rapid and unanimous adoption of Docker in the industry, it's relevant to analyze this software and understand how it works in order to fully take advantage of the containerization features Docker provides. Thus, this paper is not intended to be a tutorial on how to use Docker and the features that will be explored, but as an overview on how Docker manages containerization, this includes both the overall architecture and the main features that provides secure, reliable and robust isolation. With this paper, the author hopes to pull back the abstraction Docker provides and present how Docker automates and simplifies the creation of secure containers by taking advantage of the tools available on the Linux kernel. 
+
+As such, it is important to note that only the Linux distribution of Docker will be discussed. As Docker resorts frequently to Linux libraries and kernel features, it would be out of the scope of this paper to discuss how these features are translated to the Windows environment. As such, many of the nomeaculture regarding various Docker modules or drivers used in this paper will differ from the Windows implementation.
