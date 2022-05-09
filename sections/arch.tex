@@ -1,8 +1,6 @@
 \section{Docker Architecture}
 \label{sec::arch}
 
-\placeholder{Architecture intro}
-
 % 3. Docker Architecture
 %     1. The Docker engine
 %         1. Client server
@@ -37,11 +35,11 @@ Within this architecture, the Docker daemon is the component responsible for cre
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=0.25\textwidth]{docker_engine.png}
-    \caption{\placeholder{Current and planned container use for all organizations.}}
+    \caption{Diagram representing the Docker Engine architecture\cite{fig-src:docker-engine}.}
     \label{fig::docker-engine-server}
 \end{figure}
 
-Despite being, at its core, a client-server architecture, Docker's server is far from monolithic, \placeholder{as shown in figure \ref{fig::docker-engine-server}}. The server operates a set of smaller components, among them \texttt{runc} and \texttt{containerd}, the main modules responsible for creating and running containers. Both implement as closely as possible the OCI open source project specifications\cite{Poulton2020-ju, oci-runc, git-runc, docker-containerd}.
+Despite being, at its core, a client-server architecture, Docker's server is far from monolithic (figure \ref{fig::docker-engine-server}). The server operates a set of smaller components, among them \texttt{runc} and \texttt{containerd}, the main modules responsible for creating and running containers. Both implement as closely as possible the OCI open source project specifications~\cite{Poulton2020-ju, oci-runc, git-runc, docker-containerd}.
 
 The first program, \texttt{runc}, is a \acs{CLI} component responsible for creating and running applications. Its purpose is to be a standalone low-level tool called by any high-level application, such as Docker. In order to achieve this, \texttt{runc} relies on the library \texttt{libcontainer} to access the container isolation features of the \acs{OS}, such as \texttt{seccomp} and user namespaces\cite{runc-estes}.
 
@@ -58,12 +56,6 @@ As defined by the \texttt{libcontainer} README page, a container is "a self-cont
 Despite the behavior similarities between containers and \acsp{VM}, they are fundamentally different since all the containers running in the system share the same kernel, so the isolation between workloads is implemented within that one kernel. As a result, there is one less layer of abstraction between the isolated task and the hardware underneath, which results in better resource efficiency.
 
 However, it's only possible to run processes that are compatible with the underlining kernel, \ie~ a Windows container cannot run Linux application and vice versa.
-
-% containers follow the same process group signal propagations that any other process group would recieve on linux
-% auto restarting a continer?
-% normal docker stop sends a SIGTERM to kill the container
-% docker stop initially sends sigterm signal, if the container as not stopped within 25 seconds, a SIGKILL signal is sent to forcefully kill it
-% if docker kill wont stop the container, docker kill is used
 
 
 
@@ -99,21 +91,18 @@ Volumes are created and managed by Docker and are stored within a folder on the 
 
 On the other hand, bind mounts consist on directories on the host machine being mounted into a container. This mounts are limited in functionality, as they are not managed by Docker itself.
 
-\placeholder{Connect section to Networking, if possible}
-% https://docs.docker.com/storage/storagedriver/
 
 
 \subsection{Networking}
 \label{ssec::arch:net}
 
-Docker containers are able to establish network connections both between one or various containers, or between non-container networks. When a container is attached to a Docker network, an unique \acs{IP} address is attributed to said container. Docker networks are regarded as first-class entities, each having their own life cycle and are not dependent on other components. This element of Docker is composed by three main modules:
+Docker containers are able to establish network connections both between one or various containers, or between non-container networks. When a container is attached to a Docker network, an unique \acs{IP} address is attributed to said container. Docker networks are regarded as first-class entities, each having their own life cycle and are not dependent on other components, being composed by three main modules\cite{Poulton2020-ju}:
 
 \begin{itemize}
     \item \textbf{\ac{CNM}} --- the network's design specifications which outlines the fundamental building blocks of a docker network;
     \item \textbf{\texttt{libnetwork}} --- native Go implementation of the core components outlined in the \ac{CNM};
     \item \textbf{Network drivers} --- pluggable interfaces that provide the networking subsystem.
 \end{itemize}
-
 
 To fully comprehend the different network configurations available, it's important the underlining building blocks of the \ac{CNM} interface. Each container defines a \textbf{network sandbox}, which is an isolated environment containing the networking configuration of the container, including ethernet interfaces, ports, routing tables and \acs{DNS} configuration. A network sandbox may contain multiple \textbf{endpoints}, the virtual network interfaces responsible for maintaining the connection between the sandbox and a given network. A \textbf{network} is a uniquely identifiable group of endpoints capable of communicating with each other, connecting different networking sandboxes.
 
@@ -133,16 +122,15 @@ Based on these building blocks, the \texttt{libnetwork} is the core implementati
     \label{fig:cnm-drivers}
 \end{figure}
 
-It's possible to implement and use 3rd-party drivers, but Docker is shipped with several built-in drivers, known as native or local drivers. These being:
+It's possible to implement and use 3rd-party drivers, but Docker is shipped with several built-in drivers, known as native or local drivers\cite{network-drivers}. These being:
 
 \begin{itemize}
-    \item \texttt{bridge} --- provides an implementation of a 802.1d bridge (layer 2 switch) between containers running on the same machine. The default bridge network maps to an underlying Linux bridge in the host's kernel named "\texttt{docker0}", which is, in it's turn mapped back to an Ethernet interface on the host via port mappings;
-    \item \texttt{host} --- the container's network stack is not isolated from Docker's host. This driver instructs Docker not to create any networking namespace or resource for attached containers. Containers on this network will interact with the host's network just like uncontained processes. Despite this, all the other aspects of the container will be isolated;
-    \item \texttt{overlay} --- Connects Docker daemons running on different hosts, widely used swarm services are used;
-    \item \texttt{macvlan} --- allows to attach a \acs{MAC} address to a container, making it appear as a physical device on the network;
-    \item \texttt{ipvlan} ---gives the user complete control over IPv4 and IPv6 addressing;
+    \item \texttt{bridge} --- provides an implementation of a 802.1d bridge (layer 2 switch) between containers running on the same machine. The default bridge network maps to an underlying Linux bridge in the host's kernel named "\texttt{docker0}", which is, in it's turn mapped back to an Ethernet interface on the host via port mappings\cite{network-bridge};
+    \item \texttt{host} --- the container's network stack is not isolated from Docker's host. This driver instructs Docker not to create any networking namespace or resource for attached containers. Containers on this network will interact with the host's network just like uncontained processes. Despite this, all the other aspects of the container will be isolated\cite{network-host};
+    \item \texttt{overlay} --- Connects Docker daemons running on different hosts, widely used swarm services are used \cite{network-overlay};
+    \item \texttt{macvlan} --- allows to attach a \acs{MAC} address to a container, making it appear as a physical device on the network\cite{network-mac};
+    \item \texttt{ipvlan} ---gives the user complete control over IPv4 and IPv6 addressing\cite{network-ipvlan};
     \item \texttt{none} --- uses the null driver, meaning the containers attached to the network won't have any network connection outside themselves.
 \end{itemize}
-\placeholder{To do: add docker site sources}
 
-These configurations fall under three categories: local, global or swarm. This indicates whether the network is constrained to the machine where the network exists (local), should be created on every node in a cluster but not route between them (global), or seamlessly spans all of the hosts participating in a Docker swarm (multi-host or cluster-wide). The default networks have a local scope, and will not be able to directly route traffic between containers running on different machines.
+These configurations fall under three categories: local, global or swarm. This indicates whether the network is constrained to the machine where the network exists (local), should be created on every node in a cluster but not route between them (global), or seamlessly spans all of the hosts participating in a Docker swarm (multi-host or cluster-wide)\cite{Poulton2020-ju}. The default networks have a local scope, and will not be able to directly route traffic between containers running on different machines\cite{network-drivers}.

@@ -7,12 +7,10 @@
 \section{Docker Security}
 \label{sec::security}
 
-\placeholder{Add security intro}
-
 \subsection{cgroups}
 \label{ssec::security:cgroups}
 
-Docker relies on cgroups to limit a container's resources, such as memory, swap, \acs{CPU}, storage and network I/O. cgroups are built into the Linux kernel and this mechanism assures that one container process can't affect the performance of the other processes running on the host machine. In the official kernel documentation it is defined as:
+Docker relies on cgroups to limit a container's resources, such as memory, swap, \acs{CPU}, storage and network I/O. cgroups are built into the Linux kernel and this mechanism assures that one container process can't affect the performance of the other processes running on the host machine. In the official kernel documentation\cite{cgroup-man}, it is defined as:
 \begin{displayquote}
     \textit{"A mechanism for aggregating/partitioning sets of tasks and all their future children into hierarchical groups with specialized behavior."}
 \end{displayquote}
@@ -25,21 +23,21 @@ This hierarchy can be displayed in the figure \ref{fig:cgroup-hch}.
     \label{fig:cgroup-hch}
 \end{figure}
 
-When a container is created, Docker automatically assigns a cgroup unique to that container and all the processes of that container will be in the same group.
+When a container is created, Docker automatically assigns a cgroup unique to that container and all the processes of that container will be in the same group\cite{docker-cgroups}.
 
-Constraining resources protects against a class of attacks that attempt to disrupt the system by consuming excessive resources, starving the legitimate applications. It's recommended to set CPU and memory limits in each container when deploying container applications.
+Constraining resources protects against a class of attacks that attempt to disrupt the system by consuming excessive resources, starving the legitimate applications. It's recommended to set CPU and memory limits in each container when deploying container applications\cite{Rice2020-kl}.
 
 
 \subsection{Namespaces}
 \label{ssec::security:namespaces}
 
-A Linux namespace groups a set of global resources in a layer of abstraction so to appear that the processes wrapped in that namespace do not affect the resources not encompassed in that namespace. A process running in a given namespace cannot see or use the resources out of the boundaries set by that namespace.
+A Linux namespace groups a set of global resources in a layer of abstraction so to appear that the processes wrapped in that namespace do not affect the resources not encompassed in that namespace\cite{namespaces-linux, namespaces}. A process running in a given namespace cannot see or use the resources out of the boundaries set by that namespace.
 
-This tool is the very core of containerization. It allows Docker to divide the \ac{OS} so it appears multiple isolated \acp{OS}. Rather than having a single namespace, Docker containers set up a namespace for each of the six types of resources, these being:
+This tool is the very core of containerization. It allows Docker to divide the \ac{OS} so it appears multiple isolated \acp{OS}\cite{namespaces-docker}. Rather than having a single namespace, Docker containers set up a namespace for each of the six types of resources\cite{Poulton2020-ju}, these being:
 
 \begin{itemize}
     \item \textbf{\ac{PID} namespace} --- Docker creates \ac{PID} namespace to provide isolated process trees for each container;
-    \item \textbf{Mount namespace} --- Each container contains it's own isolated root \texttt{\textbackslash} filesystem. Each process can only access its own isolated mount namespace;
+    \item \textbf{Mount namespace} --- Each container is attributed it's own isolated root \texttt{\textbackslash} filesystem. Each process can only access its own isolated mount namespace;
     \item \textbf{\ac{IPC} namespace} --- Allows Docker to manage shared memory both within and outside the container;
     \item \textbf{User namespaces} --- Docker is able to map container users to different users on the Linux host;
     \item \textbf{\ac{UTS} namespace} --- Gives the container its own hostname and domain name. By providing a process running within the container its own \ac{UTS}, it's possible to change the host name of that process without affecting the rest of the system;
@@ -50,7 +48,7 @@ This tool is the very core of containerization. It allows Docker to divide the \
 \subsection{Secure Computing Mode}
 \label{ssec::security:sec-compt}
 
-Seccomp (short for secure computing mode) is a Linux mechanism that filters the system calls an application is allowed to make. Each process in seccomp mode is applied a profile that determines what action must be taken when a give system call is matched to the process' profile. When a action is matched, it can either return an error, terminate the process or call a tracer.
+Seccomp (short for secure computing mode) is a Linux mechanism that filters the system calls an application is allowed to make \cite{seccomp-man}. Each process in seccomp mode is applied a profile that determines what action must be taken when a give system call is matched to the process' profile. When a action is matched, it can either return an error, terminate the process or call a tracer.
 
 Docker applies a default seccomp profile that blocks more than 40 system calls that are undesirable to have a container execute. For instance, a container shouldn't be able to alter the host's clock, so Docker's profile blocks the \texttt{clock\_adjtime} and \texttt{clock\_settime} calls \cite{Rice2020-kl}.
 
@@ -60,7 +58,7 @@ The complete list of system calls can be found in Docker's documentation \cite{d
 \subsection{Mandatory Access Control}
 \label{ssec::security:sel-apparm}
 
-Mandatory Access Control is a class of security system where a system wide security policy grants users access to a given resource. This mechanism gives the administrator more granular control over their system in a way individual users can't override.
+Mandatory Access Control is a class of security system where a system wide security policy grants users access to a given resource. This mechanism gives the administrator more granular control over their system in a way individual users can't override\cite{Belim2018}.
 
 Docker supports two major Linux Mandatory Access Control technologies, these being AppArmor and SELinux.
 
@@ -69,9 +67,7 @@ Docker supports two major Linux Mandatory Access Control technologies, these bei
 One of the \ac{LSM} available in the Linux kernel where an executable file can be associated with a profile, defining what that file is allowed to access. It also allows any violations to logged \cite{ubuntu-apparmor}. A default profile is automatically applied to containers, it provides a wide application compatibility and moderate protection \cite{docker-apparmor}.
 
 \subsubsection{\textbf{SELinux}}
-\placeholder{Begin draft}
-SElinux lets you constrain what a process is allowed to do in terms of its interactions with files and other processes. Each process runs under an SELinux domain and every file has a type.
 
-Creating an effective SELinux profile for an application takes in-depth knowledge of the set of files that it might need access to, in both happy and error paths, so that task may be best left to the app developer. Some vendors provide profiles for their applications.
+Is the primary Mandatory Access control mechanism built into a number of Linux distributions and configured by default in Red Hat systems. This mechanism allows the admin to determine how a process is able to interact with files and other processes \cite{Rice2020-kl}.
 
-\placeholder{End draft}
+When enabled in the system, every process runs under a SElinux domain and every file has a type. Docker's container processes execute with the \texttt{container\_t} SELinux type. This type applies a very flexible policy, allowing users to setup their container processes in as secure a method as possible \cite{selinux}.
