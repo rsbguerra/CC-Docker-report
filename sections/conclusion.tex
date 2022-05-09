@@ -5,6 +5,17 @@
 
 % FROM ABSTRACT: Henceforth, Docker is a robust solution for the deployment of multiple real-world applications while better taking advantage of available resources and Linux kernel native functionalities and security model.
 
+Containerization has exponentially grown in the later years to become one of the \textit{de facto} solutions for multiple application deployment on a single host maintaining the proper isolation. While older options have provided reliable solutions, a myriad of problems were common, namely:
 
+\begin{itemize}
+	\item Huge hardware costs and lack of scalability in dedicated hosts;
+	\item Poorer performance, low resource-use efficiency and lack of proper cross-platform standards (either in a \acs{VM} software or a \acs{OS} level) in virtualization.
+\end{itemize}
 
+However, containerization had been a chore for sysadmins across the globe. Creating, managing and operating containers was no easy task and it required a high level of specific skills and knowledge of the Linux kernel and inner workings.
 
+To change this, Docker was introduced to be an open-source software that allowed containers to be easier to use. It leverages the Linux kernel architecture to bolster its own functionalities and security model in order to properly isolate containers. Nevertheless, it still allows third-party drivers to be plugged and used.
+
+Docker's popularity proved the need for standardization and, as such, there currently is the \acf{OCI}, something even virtualization is lacking to this day, even though it precedes containers. 
+
+In the end, the major problems that affected previous solutions have been successfully tackled by containerization in general and by Docker in particular. Containers have thus become a major staple in application deployment in real world scenarios.
